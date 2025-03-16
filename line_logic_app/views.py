@@ -26,10 +26,10 @@ def visualize(request, pk):
 
 @csrf_exempt
 def get_graph_data(request, pk):
-    dag_data = DagData.objeects.get(pk=pk)
+    dag_data = DagData.objects.get(pk=pk)
     file_path = dag_data.csv_file.path
+    df = pd.read_csv(file_path)
 
-    # Read the CSV file
     nodes = set()
     for _, row in df.iterrows():
         nodes.add(row['source'])
@@ -42,7 +42,7 @@ def get_graph_data(request, pk):
         edges_list.append({
             "from": row['source'],
             "to": row['target'],
-            "label": f"Avg: {rpw['average']}\nStd: {row['standard_deviation']}",
+            "label": f"Avg: {row['average']}\nStd: {row['standard_deviation']}",
             "title": f"Type: {row['resource_type']}",
             "value": float(row['average'])
         })
@@ -51,5 +51,4 @@ def get_graph_data(request, pk):
         "nodes": node_list,
         "edges": edges_list
     }
-
     return JsonResponse(graph_data)
