@@ -1,64 +1,3 @@
-<!-- line_logic_app/templates/line_logic_app/base.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DAG Visualizer</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    {% block extra_head %}{% endblock %}
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">DAG Visualizer</a>
-        </div>
-    </nav>
-    
-    <div class="container mt-4">
-        {% block content %}{% endblock %}
-    </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    {% block extra_scripts %}{% endblock %}
-</body>
-</html>
-
-<!-- line_logic_app/templates/line_logic_app/home.html -->
-{% extends 'line_logic_app/base.html' %}
-
-{% block content %}
-<div class="row">
-    <div class="col-md-6 offset-md-3">
-        <div class="card">
-            <div class="card-header">
-                <h3>Upload DAG Data</h3>
-            </div>
-            <div class="card-body">
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
-                        {{ form.title }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.description.id_for_label }}" class="form-label">Description (Optional)</label>
-                        {{ form.description }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.csv_file.id_for_label }}" class="form-label">CSV File</label>
-                        {{ form.csv_file }}
-                        <div class="form-text">CSV should have columns: source, target, average, standard_deviation, resource_type</div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Upload & Visualize</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-<!-- line_logic_app/templates/line_logic_app/visualize.html -->
 {% extends 'line_logic_app/base.html' %}
 
 {% block extra_head %}
@@ -104,7 +43,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Fetch the graph data
-        fetch('/dag/api/graph/{{ dag_data.id }}/')
+        fetch('/line_logic/api/graph/{{ dag_data.id }}/')
             .then(response => response.json())
             .then(data => {
                 // Create a network visualization
