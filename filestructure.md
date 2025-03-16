@@ -23,6 +23,11 @@ File Structure
         |- urls.py
         |- views.py
         |- __pycache__ (directory)
+        |- templates (directory)
+            |- line_logic_app (directory)
+                |- base.html
+                |- home.html
+                |- visualize.html
         |- migrations (directory)
             |- __init__.py
             |- 0001_initial.py
@@ -139,167 +144,6 @@ var/www/jonahorlovsky.com
 	</footer>
 </body>
 </html>
-
-- var/www/jonahorlovsky.com
-    |- dag_vis.html (html for the line_logic django app)
-<!-- dag_app/templates/dag_app/base.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DAG Visualizer</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    {% block extra_head %}{% endblock %}
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">DAG Visualizer</a>
-        </div>
-    </nav>
-    
-    <div class="container mt-4">
-        {% block content %}{% endblock %}
-    </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    {% block extra_scripts %}{% endblock %}
-</body>
-</html>
-
-<!-- dag_app/templates/dag_app/home.html -->
-{% extends 'dag_app/base.html' %}
-
-{% block content %}
-<div class="row">
-    <div class="col-md-6 offset-md-3">
-        <div class="card">
-            <div class="card-header">
-                <h3>Upload DAG Data</h3>
-            </div>
-            <div class="card-body">
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
-                        {{ form.title }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.description.id_for_label }}" class="form-label">Description (Optional)</label>
-                        {{ form.description }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.csv_file.id_for_label }}" class="form-label">CSV File</label>
-                        {{ form.csv_file }}
-                        <div class="form-text">CSV should have columns: source, target, average, standard_deviation, resource_type</div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Upload & Visualize</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-<!-- dag_app/templates/dag_app/visualize.html -->
-{% extends 'dag_app/base.html' %}
-
-{% block extra_head %}
-<link href="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/dist/vis-network.min.css" rel="stylesheet">
-<style>
-    #network {
-        width: 100%;
-        height: 600px;
-        border: 1px solid #ddd;
-    }
-    .card-body {
-        overflow: auto;
-    }
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="row">
-    <div class="col-12">
-        <h2>{{ dag_data.title }}</h2>
-        {% if dag_data.description %}
-            <p>{{ dag_data.description }}</p>
-        {% endif %}
-    </div>
-</div>
-
-<div class="row mt-3">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h4>DAG Visualization</h4>
-            </div>
-            <div class="card-body">
-                <div id="network"></div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_scripts %}
-<script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/dist/vis-network.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Fetch the graph data
-        fetch('/dag/api/graph/{{ dag_data.id }}/')
-            .then(response => response.json())
-            .then(data => {
-                // Create a network visualization
-                const container = document.getElementById('network');
-                
-                const options = {
-                    nodes: {
-                        shape: 'box',
-                        font: {
-                            size: 16
-                        },
-                        borderWidth: 2
-                    },
-                    edges: {
-                        width: 2,
-                        arrows: {
-                            to: { enabled: true, scaleFactor: 1 }
-                        },
-                        font: {
-                            size: 12
-                        }
-                    },
-                    physics: {
-                        stabilization: true,
-                        hierarchicalRepulsion: {
-                            nodeDistance: 150
-                        }
-                    },
-                    layout: {
-                        hierarchical: {
-                            direction: 'LR',
-                            sortMethod: 'directed'
-                        }
-                    }
-                };
-                
-                const network = new vis.Network(container, data, options);
-                
-                // Add event listeners for interaction
-                network.on('click', function(params) {
-                    if (params.nodes.length > 0) {
-                        console.log('Node clicked:', params.nodes[0]);
-                    } else if (params.edges.length > 0) {
-                        console.log('Edge clicked:', params.edges[0]);
-                    }
-                });
-            })
-            .catch(error => console.error('Error fetching graph data:', error));
-    });
-</script>
-{% endblock %}
 
 - var/www/jonahorlovsky.com
     |- manage.py (manage file for the line_logic app)
@@ -593,6 +437,177 @@ def get_graph_data(request, pk):
         "edges": edges_list
     }
     return JsonResponse(graph_data)
+
+- var/www/jonahorlovsky.com
+    |- line_logic_app (directory)
+        |- templates
+            |- line_logic_app
+                |- base.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAG Visualizer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">DAG Visualizer</a>
+        </div>
+    </nav>
+    
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
+
+- var/www/jonahorlovsky.com
+    |- line_logic_app (directory)
+        |- templates
+            |- line_logic_app
+                |- home.html
+{% extends 'line_logic_app/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h3>Upload DAG Data</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+                        {{ form.title }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">Description (Optional)</label>
+                        {{ form.description }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.csv_file.id_for_label }}" class="form-label">CSV File</label>
+                        {{ form.csv_file }}
+                        <div class="form-text">CSV should have columns: source, target, average, standard_deviation, resource_type</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload & Visualize</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+- var/www/jonahorlovsky.com
+    |- line_logic_app (directory)
+        |- templates
+            |- line_logic_app
+                |- visualize.html
+{% extends 'line_logic_app/base.html' %}
+
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/dist/vis-network.min.css" rel="stylesheet">
+<style>
+    #network {
+        width: 100%;
+        height: 600px;
+        border: 1px solid #ddd;
+    }
+    .card-body {
+        overflow: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{{ dag_data.title }}</h2>
+        {% if dag_data.description %}
+            <p>{{ dag_data.description }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>DAG Visualization</h4>
+            </div>
+            <div class="card-body">
+                <div id="network"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/dist/vis-network.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fetch the graph data
+        fetch('/line_logic/api/graph/{{ dag_data.id }}/')
+            .then(response => response.json())
+            .then(data => {
+                // Create a network visualization
+                const container = document.getElementById('network');
+                
+                const options = {
+                    nodes: {
+                        shape: 'box',
+                        font: {
+                            size: 16
+                        },
+                        borderWidth: 2
+                    },
+                    edges: {
+                        width: 2,
+                        arrows: {
+                            to: { enabled: true, scaleFactor: 1 }
+                        },
+                        font: {
+                            size: 12
+                        }
+                    },
+                    physics: {
+                        stabilization: true,
+                        hierarchicalRepulsion: {
+                            nodeDistance: 150
+                        }
+                    },
+                    layout: {
+                        hierarchical: {
+                            direction: 'LR',
+                            sortMethod: 'directed'
+                        }
+                    }
+                };
+                
+                const network = new vis.Network(container, data, options);
+                
+                // Add event listeners for interaction
+                network.on('click', function(params) {
+                    if (params.nodes.length > 0) {
+                        console.log('Node clicked:', params.nodes[0]);
+                    } else if (params.edges.length > 0) {
+                        console.log('Edge clicked:', params.edges[0]);
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching graph data:', error));
+    });
+</script>
+{% endblock %}
 
 Configurations Files
 - /etc/systemd/system/

@@ -1,7 +1,7 @@
 {% extends 'line_logic_app/base.html' %}
 
 {% block extra_head %}
-<link href="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/dist/vis-network.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/vis-network.min.css" rel="stylesheet">
 <style>
     #network {
         width: 100%;
@@ -39,7 +39,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/dist/vis-network.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/vis-network.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Fetch the graph data
@@ -53,23 +53,24 @@
                     nodes: {
                         shape: 'box',
                         font: {
-                            size: 16
+                            size: 10
                         },
-                        borderWidth: 2
+                        borderWidth: .25
                     },
                     edges: {
-                        width: 2,
+                        width: 1,
                         arrows: {
-                            to: { enabled: true, scaleFactor: 1 }
+                            to: { enabled: false }
                         },
                         font: {
-                            size: 12
+                            size: 12,
+                            align: 'middle',
                         }
                     },
                     physics: {
                         stabilization: true,
                         hierarchicalRepulsion: {
-                            nodeDistance: 150
+                            nodeDistance: 100
                         }
                     },
                     layout: {
